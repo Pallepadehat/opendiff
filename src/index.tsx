@@ -1,16 +1,16 @@
+#!/usr/bin/env bun
+
 import { render } from "@opentui/solid";
 import { parseCli, formatHelp } from "./cli";
 import { buildDiffModel } from "./diff/engine";
 import { App } from "./tui/App";
-
-const VERSION = "0.1.0";
 
 const cliResult = parseCli(process.argv);
 
 if (cliResult.kind === "help") {
   console.log(formatHelp(cliResult.commandName));
 } else if (cliResult.kind === "version") {
-  console.log(VERSION);
+  console.log(await getAppVersion());
 } else if (cliResult.kind === "error") {
   console.error(`Error: ${cliResult.message}`);
   console.error("");
@@ -34,4 +34,18 @@ if (cliResult.kind === "help") {
     console.error(`Error: ${message}`);
     process.exitCode = 1;
   }
+}
+
+async function getAppVersion(): Promise<string> {
+  const packageJsonPath = new URL("../package.json", import.meta.url);
+  const packageJson = await Bun.file(packageJsonPath).json();
+  if (
+    packageJson &&
+    typeof packageJson === "object" &&
+    "version" in packageJson &&
+    typeof packageJson.version === "string"
+  ) {
+    return packageJson.version;
+  }
+  return "0.0.0";
 }

@@ -6,7 +6,7 @@ cd "$ROOT_DIR"
 
 mkdir -p dist
 
-VERSION="$(bun -e "const pkg=require('./package.json');console.log(pkg.version)")"
+VERSION="$(bun -e "const pkg = JSON.parse(await Bun.file('./package.json').text()); console.log(pkg.version)")"
 
 echo "Building release binaries..."
 bun run build:release

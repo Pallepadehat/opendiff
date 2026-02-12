@@ -6,9 +6,25 @@
   "type": "module",
   "private": false,
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pallepadehat/opendiff.git"
+  },
+  "homepage": "https://github.com/Pallepadehat/opendiff",
+  "bugs": {
+    "url": "https://github.com/Pallepadehat/opendiff/issues"
+  },
+  "engines": {
+    "bun": ">=1.3.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
-    "opendiff": "dist/opendiff",
-    "vd": "dist/opendiff"
+    "opendiff": "dist/opendiff.js",
+    "vd": "dist/opendiff.js"
   },
   "scripts": {
     "dev": "bun run --watch src/index.tsx --",
@@ -17,7 +33,8 @@
     "typecheck": "tsc --noEmit",
     "build": "bun run build.ts",
     "build:release": "bun run build.ts --release",
-    "release:artifact": "./scripts/build-release.sh"
+    "release:artifact": "./scripts/build-release.sh",
+    "release:formula": "bun run scripts/update-homebrew-formula.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

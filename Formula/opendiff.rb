@@ -1,24 +1,20 @@
 class Opendiff < Formula
   desc "Clean and user-friendly visual terminal diff tool"
-  homepage "https://github.com/<owner>/opendiff"
+  homepage "https://github.com/Pallepadehat/opendiff"
   version "0.1.0"
 
   on_macos do
     on_arm do
-      url "https://github.com/<owner>/opendiff/releases/download/v0.1.0/opendiff-darwin-arm64"
-      sha256 "REPLACE_WITH_DARWIN_ARM64_SHA256"
-    end
-  end
-
-  on_linux do
-    on_intel do
-      url "https://github.com/<owner>/opendiff/releases/download/v0.1.0/opendiff-linux-x64"
-      sha256 "REPLACE_WITH_LINUX_X64_SHA256"
+      url "https://github.com/Pallepadehat/opendiff/releases/download/v0.1.0/opendiff-darwin-arm64"
+      sha256 "1a0f31fe95277949fae7d0825324390b6705c3764a122a24ece99c017c82d892"
     end
   end
 
   def install
-    bin.install Dir["opendiff-*"].first => "opendiff"
+    binary = Dir["opendiff-*"].first
+    raise "No opendiff binary found in downloaded artifact." if binary.nil?
+
+    bin.install binary => "opendiff"
     bin.install_symlink "opendiff" => "vd"
   end
 
