@@ -19,9 +19,11 @@ It ships with two commands:
 ### Homebrew (tap)
 
 ```bash
-brew tap Pallepadehat/opendiff
-brew install opendiff
+brew tap Pallepadehat/opendiff https://github.com/Pallepadehat/opendiff
+brew install Pallepadehat/opendiff/opendiff
 ```
+
+Homebrew normally maps `owner/repo` taps to `owner/homebrew-repo`. The explicit tap URL above tells Homebrew to use this repository directly.
 
 After install, both commands are available:
 
