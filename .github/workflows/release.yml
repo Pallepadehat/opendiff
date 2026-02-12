@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: bun-darwin-arm64
+          - os: ubuntu-latest
+            target: bun-linux-x64
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build release binary
+        run: OPENDIFF_RELEASE_TARGETS=${{ matrix.target }} bun run build:release
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          shasum -a 256 opendiff-* > checksums-${{ matrix.target }}.txt
+
+      - name: Upload release artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" dist/opendiff-* dist/checksums-${{ matrix.target }}.txt --clobber

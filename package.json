@@ -1,16 +1,27 @@
 {
   "name": "opendiff",
+  "version": "0.1.0",
+  "description": "A clean and user-friendly visual terminal diff tool built with OpenTUI.",
   "module": "src/index.tsx",
   "type": "module",
-  "private": true,
+  "private": false,
+  "license": "MIT",
+  "bin": {
+    "opendiff": "dist/opendiff",
+    "vd": "dist/opendiff"
+  },
   "scripts": {
-    "dev": "bun run --watch src/index.tsx"
+    "dev": "bun run --watch src/index.tsx --",
+    "start": "bun run src/index.tsx --",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "build": "bun run build.ts",
+    "build:release": "bun run build.ts --release",
+    "release:artifact": "./scripts/build-release.sh"
   },
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
+    "@types/bun": "latest",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@babel/core": "^7.29.0",
@@ -18,6 +29,7 @@
     "@opentui/core": "^0.1.77",
     "@opentui/solid": "^0.1.77",
     "babel-preset-solid": "1.9.9",
+    "diff": "^8.0.3",
     "solid-js": "1.9.9"
   }
 }
