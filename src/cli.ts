@@ -146,7 +146,25 @@ export function formatHelp(commandName: string): string {
     "Examples:",
     `  ${cmd} old.txt new.txt`,
     `  ${cmd} --mode unified src-old src-new`,
+    "",
+    "Tip (macOS): if your shell resolves Apple's /usr/bin/opendiff, use 'vd' to run OpenDiff.",
   ].join("\n");
+}
+
+export function formatCliError(commandName: string, message: string): string {
+  if (isMissingArgumentError(message)) {
+    const cmd = commandName || "opendiff";
+    return [
+      "Please provide two paths to compare.",
+      "",
+      formatHelp(commandName),
+      "",
+      "Quick start:",
+      `  ${cmd} left.txt right.txt`,
+    ].join("\n");
+  }
+
+  return [`Error: ${message}`, "", formatHelp(commandName)].join("\n");
 }
 
 function normalizeCommandName(rawArgv1: string | undefined): string {
@@ -158,4 +176,11 @@ function normalizeCommandName(rawArgv1: string | undefined): string {
     return "vd";
   }
   return "opendiff";
+}
+
+function isMissingArgumentError(message: string): boolean {
+  return (
+    message === "Missing required arguments: <left> <right>." ||
+    message === "Expected exactly two paths: <left> <right>."
+  );
 }

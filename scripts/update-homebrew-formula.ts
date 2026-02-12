@@ -10,7 +10,7 @@ const FORMULA_PATH = new URL("Formula/opendiff.rb", ROOT);
 const packageJson = (await Bun.file(PACKAGE_JSON_PATH).json()) as PackageJson;
 const version = readVersion(packageJson);
 const repo = readRepository(packageJson);
-const checksums = await loadChecksums();
+const checksums = await loadChecksums(version);
 
 const darwinArm64Sha = checksums["opendiff-darwin-arm64"];
 const darwinX64Sha = checksums["opendiff-darwin-x64"];
@@ -120,12 +120,26 @@ function renderLinuxSection(
   return lines.join("\n");
 }
 
-async function loadChecksums(): Promise<Record<string, string>> {
+async function loadChecksums(version: string): Promise<Record<string, string>> {
   const checksums: Record<string, string> = {};
+  const versionedChecksumPath = `dist/checksums-v${version}.txt`;
+  const versionedChecksumFile = Bun.file(versionedChecksumPath);
+  if (await versionedChecksumFile.exists()) {
+    const parsed = parseChecksums(await versionedChecksumFile.text());
+    Object.assign(checksums, parsed);
+  }
+
   const glob = new Bun.Glob("dist/checksums*.txt");
   for await (const relativePath of glob.scan(".")) {
+    if (relativePath === versionedChecksumPath) {
+      continue;
+    }
     const parsed = parseChecksums(await Bun.file(relativePath).text());
-    Object.assign(checksums, parsed);
+    for (const [filename, hash] of Object.entries(parsed)) {
+      if (!checksums[filename]) {
+        checksums[filename] = hash;
+      }
+    }
   }
   return checksums;
 }

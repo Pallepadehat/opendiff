@@ -1,6 +1,6 @@
 {
   "name": "opendiff",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A clean and user-friendly visual terminal diff tool built with OpenTUI.",
   "module": "src/index.tsx",
   "type": "module",
@@ -27,8 +27,8 @@
     "vd": "dist/opendiff.js"
   },
   "scripts": {
-    "dev": "bun run --watch src/index.tsx --",
-    "start": "bun run src/index.tsx --",
+    "dev": "bun --preload @opentui/solid/preload --watch src/index.tsx --",
+    "start": "bun --preload @opentui/solid/preload src/index.tsx --",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "build": "bun run build.ts",

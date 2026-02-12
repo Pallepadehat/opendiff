@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 2026-02-12
+
+- Fixed Homebrew-installed binary startup error (`preload not found "@opentui/solid/preload"`).
+- Removed global Bun preload config and scoped preload to local development scripts only.
+- Embedded app version at build time so compiled release binaries no longer depend on runtime `package.json` access.
+- Improved no-argument CLI behavior with a friendlier single-message usage output.
+
 ## [0.1.0] - 2026-02-12
 
 - Initial public OSS release of OpenDiff.

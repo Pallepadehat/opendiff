@@ -2,6 +2,7 @@ import solidPlugin from "@opentui/solid/bun-plugin";
 
 const args = new Set(Bun.argv.slice(2));
 type CompileTarget = "bun-darwin-arm64" | "bun-darwin-x64" | "bun-linux-x64" | "bun-linux-arm64";
+const APP_VERSION = await resolveAppVersion();
 
 if (args.has("--release")) {
   await buildRelease();
@@ -16,6 +17,9 @@ async function buildBundle() {
     outdir: "./dist",
     minify: true,
     plugins: [solidPlugin],
+    define: {
+      __OPENDIFF_VERSION__: JSON.stringify(APP_VERSION),
+    },
   });
 
   if (!result.success) {
@@ -40,6 +44,9 @@ async function buildRelease() {
       target: "bun",
       minify: true,
       plugins: [solidPlugin],
+      define: {
+        __OPENDIFF_VERSION__: JSON.stringify(APP_VERSION),
+      },
       compile: {
         target: config.target,
         outfile: config.outfile,
@@ -103,4 +110,17 @@ function assertCompileTarget(value: string): CompileTarget {
 
 function formatBuildErrors(logs: Bun.BuildOutput["logs"]): string {
   return logs.map((log) => log.message).join("\n");
+}
+
+async function resolveAppVersion(): Promise<string> {
+  const packageJson = await Bun.file("./package.json").json();
+  if (
+    packageJson &&
+    typeof packageJson === "object" &&
+    "version" in packageJson &&
+    typeof packageJson.version === "string"
+  ) {
+    return packageJson.version;
+  }
+  throw new Error("Unable to read version from package.json");
 }
