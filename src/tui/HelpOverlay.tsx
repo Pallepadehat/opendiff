@@ -1,4 +1,5 @@
 import { Show } from "solid-js";
+import { theme } from "./theme";
 
 type HelpOverlayProps = {
   directoryMode: boolean;
@@ -7,23 +8,43 @@ type HelpOverlayProps = {
 export function HelpOverlay(props: HelpOverlayProps) {
   return (
     <box
-      border
-      borderStyle="rounded"
-      borderColor="#475569"
-      title=" Help "
       width="100%"
       padding={1}
       flexDirection="column"
-      backgroundColor="#0b1220"
+      backgroundColor={theme.bg.panel}
+      border
+      borderStyle="double"
+      borderColor={theme.border.focused}
     >
-      <text fg="#e2e8f0">q / Esc   quit</text>
-      <text fg="#e2e8f0">?         toggle help</text>
-      <text fg="#e2e8f0">j / k     move selection</text>
-      <text fg="#e2e8f0">tab       next file</text>
-      <text fg="#e2e8f0">shift+tab previous file</text>
+      <box paddingBottom={1} justifyContent="center" width="100%">
+        <text fg={theme.fg.accent}>
+          <strong> HELP </strong>
+        </text>
+      </box>
+
+      <HelpItem key="q / Esc" desc="quit" />
+      <HelpItem key="?" desc="toggle help" />
+      <HelpItem key="j / k" desc="move selection" />
+      <HelpItem key="tab" desc="next file" />
+      <HelpItem key="shift+tab" desc="previous file" />
+
       <Show when={props.directoryMode}>
-        <text fg="#e2e8f0">preview   always visible side-by-side</text>
+        <HelpItem key="preview" desc="always visible side-by-side" />
       </Show>
+    </box>
+  );
+}
+
+function HelpItem(props: { key: string; desc: string }) {
+  return (
+    <box
+      flexDirection="row"
+      justifyContent="space-between"
+      paddingLeft={2}
+      paddingRight={2}
+    >
+      <text fg={theme.fg.primary}>{props.key}</text>
+      <text fg={theme.fg.muted}>{props.desc}</text>
     </box>
   );
 }

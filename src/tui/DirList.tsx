@@ -1,5 +1,6 @@
 import { For, Show } from "solid-js";
 import type { DiffItem } from "../diff/types";
+import { theme } from "./theme";
 
 type DirListProps = {
   items: DiffItem[];
@@ -9,26 +10,38 @@ type DirListProps = {
 export function DirList(props: DirListProps) {
   return (
     <box
-      border
-      borderStyle="rounded"
-      borderColor="#334155"
-      title=" Changed Files "
       flexGrow={1}
       flexDirection="column"
-      backgroundColor="#0b1220"
-      padding={1}
+      backgroundColor={theme.bg.main}
+      paddingTop={1}
     >
-      <Show when={props.items.length > 0} fallback={<text fg="#94a3b8">No changes found.</text>}>
+      <text fg={theme.fg.muted}>
+        <strong> CHANGED FILES </strong>
+      </text>
+      <box height={1} />
+      <Show
+        when={props.items.length > 0}
+        fallback={<text fg={theme.fg.muted}>No changes found.</text>}
+      >
         <For each={props.items}>
           {(item, index) => (
             <box
               paddingLeft={1}
               paddingRight={1}
               height={1}
-              backgroundColor={index() === props.selectedIndex ? "#1e293b" : undefined}
+              backgroundColor={
+                index() === props.selectedIndex ? theme.bg.selected : undefined
+              }
             >
-              <text fg={index() === props.selectedIndex ? "#f8fafc" : "#cbd5e1"}>
-                {statusBadge(item.status)} {item.relativePath}
+              <text
+                fg={
+                  index() === props.selectedIndex
+                    ? theme.fg.accent
+                    : theme.fg.secondary
+                }
+              >
+                {index() === props.selectedIndex ? "│" : " "}{" "}
+                {statusSymbol(item.status)} {item.relativePath}
               </text>
             </box>
           )}
@@ -38,7 +51,7 @@ export function DirList(props: DirListProps) {
   );
 }
 
-function statusBadge(status: DiffItem["status"]): string {
+function statusSymbol(status: DiffItem["status"]): string {
   switch (status) {
     case "added":
       return "+";

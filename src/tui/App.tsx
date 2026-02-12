@@ -5,6 +5,8 @@ import { DirList } from "./DirList";
 import { DiffPane } from "./DiffPane";
 import { HelpOverlay } from "./HelpOverlay";
 import { clampIndex, nextIndex } from "./state";
+import { theme } from "./theme";
+import { Span } from "./Span";
 
 type AppProps = {
   model: DiffModel;
@@ -45,19 +47,23 @@ export function App(props: AppProps) {
     }
 
     if (key.name === "tab") {
-      setSelectedIndex((index) => nextIndex(index, props.model.items.length, key.shift));
+      setSelectedIndex((index) =>
+        nextIndex(index, props.model.items.length, key.shift),
+      );
       return;
     }
 
     if (key.name === "j" || key.name === "down") {
-      setSelectedIndex((index) => Math.min(props.model.items.length - 1, index + 1));
+      setSelectedIndex((index) =>
+        Math.min(props.model.items.length - 1, index + 1),
+      );
     } else if (key.name === "k" || key.name === "up") {
       setSelectedIndex((index) => Math.max(0, index - 1));
     }
   });
 
   return (
-    <box flexDirection="column" flexGrow={1} backgroundColor="#0f172a">
+    <box flexDirection="column" flexGrow={1} backgroundColor={theme.bg.main}>
       <Header model={props.model} />
 
       <Show when={props.model.kind === "file"}>
@@ -72,9 +78,22 @@ export function App(props: AppProps) {
       </Show>
 
       <Show when={props.model.kind === "directory"}>
-        <box flexGrow={1} flexDirection="row" gap={1} padding={1}>
-          <box width="34%">
-            <DirList items={props.model.items} selectedIndex={selectedIndex()} />
+        <box
+          flexGrow={1}
+          flexDirection="row"
+          gap={1}
+          paddingLeft={1}
+          paddingRight={1}
+        >
+          <box width="30%">
+            <DirList
+              items={props.model.items}
+              selectedIndex={selectedIndex()}
+            />
+          </box>
+          {/* Vertical Separator */}
+          <box width={1} flexDirection="column" alignItems="center">
+            <box height="100%" width={1} backgroundColor={theme.bg.selected} />
           </box>
           <box flexGrow={1}>
             <DiffPane
@@ -90,7 +109,7 @@ export function App(props: AppProps) {
       <Footer directoryMode={props.model.kind === "directory"} />
 
       <Show when={showHelp()}>
-        <box position="absolute" right={1} bottom={2} width="46%">
+        <box position="absolute" right={2} bottom={3} width="40%">
           <HelpOverlay directoryMode={props.model.kind === "directory"} />
         </box>
       </Show>
@@ -99,30 +118,35 @@ export function App(props: AppProps) {
 }
 
 function Header(props: { model: DiffModel }) {
-  const additions = props.model.items.reduce((sum, item) => sum + item.additions, 0);
-  const deletions = props.model.items.reduce((sum, item) => sum + item.deletions, 0);
-  const info =
-    props.model.kind === "directory" && props.model.changedFiles === 0
-      ? "No differences found across directories."
-      : "Comparing left and right.";
+  const additions = props.model.items.reduce(
+    (sum, item) => item.additions + sum,
+    0,
+  );
+  const deletions = props.model.items.reduce(
+    (sum, item) => item.deletions + sum,
+    0,
+  );
 
   return (
     <box
-      border
-      borderStyle="single"
-      backgroundColor="#111827"
+      height={1}
+      flexDirection="row"
+      alignItems="center"
+      justifyContent="space-between"
       paddingLeft={1}
       paddingRight={1}
-      height={3}
-      flexDirection="column"
-      alignItems="flex-start"
-      justifyContent="center"
+      backgroundColor={theme.bg.header}
     >
-      <text fg="#e2e8f0">
-        OpenDiff | {shortPath(props.model.leftRoot)} {" <-> "} {shortPath(props.model.rightRoot)} |{" "}
-        {props.model.mode} | changed {props.model.changedFiles}/{props.model.totalFiles} | +{additions} -{deletions}
+      <text fg={theme.fg.primary}>
+        <strong>OpenDiff</strong> <Span fg={theme.fg.muted}>|</Span>{" "}
+        {shortPath(props.model.leftRoot)} <Span fg={theme.fg.muted}>↔</Span>{" "}
+        {shortPath(props.model.rightRoot)}
       </text>
-      <text fg="#94a3b8"> {info}</text>
+      <text>
+        <Span fg={theme.fg.success}>+{additions}</Span>{" "}
+        <Span fg={theme.fg.muted}>/</Span>{" "}
+        <Span fg={theme.fg.error}>-{deletions}</Span>
+      </text>
     </box>
   );
 }
@@ -130,17 +154,15 @@ function Header(props: { model: DiffModel }) {
 function Footer(props: { directoryMode: boolean }) {
   return (
     <box
-      border
-      borderStyle="single"
-      backgroundColor="#111827"
+      height={1}
+      justifyContent="flex-start"
       paddingLeft={1}
       paddingRight={1}
-      height={2}
-      justifyContent="center"
+      backgroundColor={theme.bg.header}
     >
-      <text fg="#94a3b8">
-        q quit | ? help | j/k or arrows move | tab next | shift+tab previous
-        <Show when={props.directoryMode}> | always side-by-side preview</Show>
+      <text fg={theme.fg.muted}>
+        <Span fg={theme.fg.accent}>?</Span> help{" "}
+        <Span fg={theme.fg.accent}>q</Span> quit
       </text>
     </box>
   );
