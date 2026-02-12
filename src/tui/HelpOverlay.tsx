@@ -27,6 +27,8 @@ export function HelpOverlay(props: HelpOverlayProps) {
       <HelpItem key="j / k" desc="move selection" />
       <HelpItem key="tab" desc="next file" />
       <HelpItem key="shift+tab" desc="previous file" />
+      <HelpItem key="left pane" desc="original file" />
+      <HelpItem key="right pane" desc="modified file" />
 
       <Show when={props.directoryMode}>
         <HelpItem key="preview" desc="always visible side-by-side" />

@@ -1,10 +1,12 @@
 import { For, Show } from "solid-js";
 import type { DiffItem } from "../diff/types";
 import { theme } from "./theme";
+import { Span } from "./Span";
 
 type DirListProps = {
   items: DiffItem[];
   selectedIndex: number;
+  changedFiles: number;
 };
 
 export function DirList(props: DirListProps) {
@@ -13,11 +15,17 @@ export function DirList(props: DirListProps) {
       flexGrow={1}
       flexDirection="column"
       backgroundColor={theme.bg.main}
+      border
+      borderStyle="single"
+      borderColor={theme.border.color}
       paddingTop={1}
+      paddingLeft={1}
+      paddingRight={1}
     >
       <text fg={theme.fg.muted}>
-        <strong> CHANGED FILES </strong>
+        <strong> {props.changedFiles > 0 ? "CHANGED FILES" : "FILES"} </strong>
       </text>
+      <text fg={theme.fg.muted}>{props.items.length} visible</text>
       <box height={1} />
       <Show
         when={props.items.length > 0}
@@ -40,8 +48,8 @@ export function DirList(props: DirListProps) {
                     : theme.fg.secondary
                 }
               >
-                {index() === props.selectedIndex ? "│" : " "}{" "}
-                {statusSymbol(item.status)} {item.relativePath}
+                {index() === props.selectedIndex ? "▶" : " "}{" "}
+                {item.relativePath}
               </text>
             </box>
           )}
@@ -51,19 +59,19 @@ export function DirList(props: DirListProps) {
   );
 }
 
-function statusSymbol(status: DiffItem["status"]): string {
+function statusColor(status: DiffItem["status"]): string {
   switch (status) {
     case "added":
-      return "+";
+      return theme.fg.success;
     case "removed":
-      return "-";
+      return theme.fg.error;
     case "modified":
-      return "~";
+      return theme.fg.warning;
     case "type-changed":
-      return "!";
+      return theme.fg.accent;
     case "unchanged":
-      return "=";
+      return theme.fg.secondary;
     default:
-      return "?";
+      return theme.fg.muted;
   }
 }

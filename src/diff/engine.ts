@@ -1,3 +1,4 @@
+import path from "node:path";
 import { diffLines } from "diff";
 import {
   listFilesRecursive,
@@ -13,8 +14,11 @@ export async function buildDiffModel(
   const resolved = await resolveInputs(options);
 
   if (resolved.kind === "file") {
+    const leftName = path.basename(resolved.leftPath);
+    const rightName = path.basename(resolved.rightPath);
+    const label = leftName === rightName ? leftName : `${leftName} ↔ ${rightName}`;
     const item = await buildFileItem(
-      ".",
+      label,
       resolved.leftPath,
       resolved.rightPath,
       resolved.maxFileBytes,

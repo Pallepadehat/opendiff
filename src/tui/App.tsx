@@ -1,5 +1,9 @@
 import { Show, createMemo, createSignal } from "solid-js";
-import { useKeyboard, useRenderer } from "@opentui/solid";
+import {
+  useKeyboard,
+  useRenderer,
+  useTerminalDimensions,
+} from "@opentui/solid";
 import type { DiffModel } from "../diff/types";
 import { DirList } from "./DirList";
 import { DiffPane } from "./DiffPane";
@@ -14,6 +18,7 @@ type AppProps = {
 
 export function App(props: AppProps) {
   const renderer = useRenderer();
+  const dims = useTerminalDimensions();
   const [selectedIndex, setSelectedIndex] = createSignal(0);
   const [showHelp, setShowHelp] = createSignal(false);
 
@@ -64,7 +69,7 @@ export function App(props: AppProps) {
 
   return (
     <box flexDirection="column" flexGrow={1} backgroundColor={theme.bg.main}>
-      <Header model={props.model} />
+      <Header model={props.model} termWidth={dims().width} />
 
       <Show when={props.model.kind === "file"}>
         <box flexGrow={1} padding={1}>
@@ -89,6 +94,7 @@ export function App(props: AppProps) {
             <DirList
               items={props.model.items}
               selectedIndex={selectedIndex()}
+              changedFiles={props.model.changedFiles}
             />
           </box>
           {/* Vertical Separator */}
@@ -106,7 +112,10 @@ export function App(props: AppProps) {
         </box>
       </Show>
 
-      <Footer directoryMode={props.model.kind === "directory"} />
+      <Footer
+        directoryMode={props.model.kind === "directory"}
+        termWidth={dims().width}
+      />
 
       <Show when={showHelp()}>
         <box position="absolute" right={2} bottom={3} width="40%">
@@ -117,7 +126,7 @@ export function App(props: AppProps) {
   );
 }
 
-function Header(props: { model: DiffModel }) {
+function Header(props: { model: DiffModel; termWidth: number }) {
   const additions = props.model.items.reduce(
     (sum, item) => item.additions + sum,
     0,
@@ -127,50 +136,81 @@ function Header(props: { model: DiffModel }) {
     0,
   );
 
+  const availableWidth = () => Math.max(24, props.termWidth - 2);
+  const countersText = () => `+${additions} -${deletions}`;
+  const countersWidth = () => countersText().length + 1;
+  const rootsText = () =>
+    `${shortPath(props.model.leftRoot)} -> ${shortPath(props.model.rightRoot)}`;
+  const leftText = () => `OpenDiff | ${rootsText()}`;
+
   return (
     <box
-      height={1}
       flexDirection="row"
-      alignItems="center"
       justifyContent="space-between"
       paddingLeft={1}
       paddingRight={1}
       backgroundColor={theme.bg.header}
     >
-      <text fg={theme.fg.primary}>
-        <strong>OpenDiff</strong> <Span fg={theme.fg.muted}>|</Span>{" "}
-        {shortPath(props.model.leftRoot)} <Span fg={theme.fg.muted}>↔</Span>{" "}
-        {shortPath(props.model.rightRoot)}
-      </text>
-      <text>
-        <Span fg={theme.fg.success}>+{additions}</Span>{" "}
-        <Span fg={theme.fg.muted}>/</Span>{" "}
-        <Span fg={theme.fg.error}>-{deletions}</Span>
-      </text>
+      <box flexGrow={1}>
+        <text fg={theme.fg.primary}>{leftText()}</text>
+      </box>
     </box>
   );
 }
 
-function Footer(props: { directoryMode: boolean }) {
+function Footer(props: { directoryMode: boolean; termWidth: number }) {
+  const availableWidth = () => Math.max(20, props.termWidth - 2);
+  const base = "? help  q quit";
+  const directory = "  j/k move tab next";
+  const content = () =>
+    truncateWithEllipsis(
+      props.directoryMode ? `${base}${directory}` : base,
+      availableWidth(),
+    );
+
   return (
     <box
-      height={1}
       justifyContent="flex-start"
       paddingLeft={1}
       paddingRight={1}
       backgroundColor={theme.bg.header}
     >
-      <text fg={theme.fg.muted}>
-        <Span fg={theme.fg.accent}>?</Span> help{" "}
-        <Span fg={theme.fg.accent}>q</Span> quit
-      </text>
+      <text fg={theme.fg.muted}>{content()}</text>
     </box>
   );
 }
 
 function shortPath(input: string): string {
-  if (input.length <= 44) {
+  if (input.length <= 32) {
     return input;
   }
-  return `...${input.slice(input.length - 41)}`;
+  return truncateMiddle(input, 32);
+}
+
+function truncateWithEllipsis(input: string, maxLength: number): string {
+  if (maxLength <= 0) {
+    return "";
+  }
+  if (input.length <= maxLength) {
+    return input;
+  }
+  if (maxLength === 1) {
+    return "…";
+  }
+  return `${input.slice(0, maxLength - 1)}…`;
+}
+
+function truncateMiddle(input: string, maxLength: number): string {
+  if (maxLength <= 0) {
+    return "";
+  }
+  if (input.length <= maxLength) {
+    return input;
+  }
+  if (maxLength <= 3) {
+    return truncateWithEllipsis(input, maxLength);
+  }
+  const left = Math.ceil((maxLength - 1) / 2);
+  const right = Math.floor((maxLength - 1) / 2);
+  return `${input.slice(0, left)}…${input.slice(input.length - right)}`;
 }
